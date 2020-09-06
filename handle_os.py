@@ -1,7 +1,16 @@
 '''
     handle the operating system, delete, select create and read files
 '''
-import os, getpass, shutil
+import os, getpass, shutil, glob
+
+username = getpass.getuser() #get the user 
+desktop_path = f'/home/{username}/Desktop'
+downloads_path = f'/home/{username}/Downloads'
+documents_path = f'/home/{username}/Documents'
+IMAGE_EXTENSIONS = ['.jpeg', '.jpg', '.png']
+COMPRESSED_EXTENSIONS = ['.zip', '.tar']
+DOCUMENTS_EXTENSIONS = ['.pdf', '.txt', '.odp']
+
 
 def delete_file(assistant):
 
@@ -64,30 +73,86 @@ def organize(*args):
         target folders: Desktop, Downloads, Documents
         args: paths to choose where to organize
     '''
-    username = getpass.getuser() #get the user 
 
-    desktop_path = f'/home/{username}/Desktop'
-    downloads_path = f'/home/{username}/Downloads'
-    documents_path = f'/home/{username}/Documents'
-
-    paths = set()
-
+    organize_dirs = set()
+    
     if 'desktop' in args:
-        paths.add(desktop_path)
+        organize_dirs.add('desktop')
     
     if 'downloads' in args:
-        paths.add(downloads_path)
-    
+        organize_dirs.add('downloads')
+
     if 'documents' in args:
-        paths.add(documents_path)
-    
+        organize_dirs.add('documents')
+
     if 'all' in args:
-        paths.add(desktop_path)
-        paths.add(downloads_path)
-        paths.add(documents_path)
+        organize_dirs.add('desktop')
+        organize_dirs.add('downloads')
+        organize_dirs.add('documents')
 
-    path = paths.pop()
+    while organize_dirs:
+        dir = organize_dirs.pop()
+        if dir == 'downloads':
+            organize_downloads()
+        elif dir == 'desktop':
+            pass
+        elif dir == 'documents':
+            pass
 
-    items = os.listdir(path)
+def check_create_path(path):
+    '''
+        check if the provided path is a dir, and returns True if it is
+        creates a dir if its not a dir, and returns False
+        args: path
+        returns: isdir(boolean), path(str) 
+    '''
+    if os.path.exists(path):
+        if os.path.isdir(path):
+            return True, path
+    else:
+        os.mkdir(path)
+        return False, path
 
-    print(items)
+def organize_downloads():
+    '''
+        function to organize the downloads dir into 4 categories
+        Images, Documents, Compressed, Others
+    '''
+    downloads_cats = ['Images', 'Documents', 'Compressed', 'Others']
+    
+    # for cat in downloads_cats: # make sure all the cat folders do exist
+    #     cat_path = downloads_path + f'/{cat}'
+    #     _, cat_path = check_create_path(cat_path)
+
+    items = os.listdir(downloads_path) #all items in downlaods
+    
+    for item in items:
+        
+        moved = False
+
+        for img_ext in IMAGE_EXTENSIONS:  #handle images
+            if item.endswith(img_ext):
+                cat_path = downloads_path + f'/{downloads_cats[0]}'
+                check_create_path(cat_path)
+                #move to Images
+                shutil.move(f'{downloads_path}/{item}', f'{downloads_path}/Images/{item}')
+                moved = True
+        
+        for doc_ext in DOCUMENTS_EXTENSIONS:
+            if item.endswith(doc_ext):
+                cat_path = downloads_path + f'/{downloads_cats[1]}'
+                check_create_path(cat_path)                # move to Documnets
+                shutil.move(f'{downloads_path}/{item}', f'{downloads_path}/Documents/{item}')
+                moved = True
+
+        for compress_ext in COMPRESSED_EXTENSIONS:
+            if item.endswith(compress_ext):
+                cat_path = downloads_path + f'/{downloads_cats[2]}'
+                check_create_path(cat_path)                #move to Compressed
+                shutil.move(f'{downloads_path}/{item}', f'{downloads_path}/Compressed/{item}')
+                moved = True
+        
+        if not moved and not os.path.isdir(downloads_path+f'/{item}'): # if the item is not moved yet
+                cat_path = downloads_path + f'/{downloads_cats[3]}'
+                check_create_path(cat_path)            
+                shutil.move(f'{downloads_path}/{item}', f'{downloads_path}/Others/{item}')
