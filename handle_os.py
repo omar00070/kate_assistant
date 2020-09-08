@@ -5,7 +5,7 @@ import os, getpass, shutil, glob
 
 USERNAME = getpass.getuser() #get the user 
 DESKTOP_PATH = f'/home/{USERNAME}/Desktop'
-DOWNLOADs_PATH = f'/home/{USERNAME}/Downloads'
+DOWNLOADS_PATH = f'/home/{USERNAME}/Downloads'
 DOCUMENTS_PATH = f'/home/{USERNAME}/Documents'
 IMAGE_EXTENSIONS = ['.jpeg', '.jpg', '.png']
 COMPRESSED_EXTENSIONS = ['.zip', '.tar']
@@ -95,7 +95,7 @@ def organize(*args):
         if dir == 'downloads':
             organize_downloads()
         elif dir == 'desktop':
-            pass
+            organize_desktop()
         elif dir == 'documents':
             pass
 
@@ -121,10 +121,10 @@ def organize_downloads():
     downloads_cats = ['Images', 'Documents', 'Compressed', 'Others']
     
     # for cat in downloads_cats: # make sure all the cat folders do exist
-    #     cat_path = DOWNLOADs_PATH + f'/{cat}'
+    #     cat_path = DOWNLOADS_PATH + f'/{cat}'
     #     _, cat_path = check_create_path(cat_path)
 
-    items = os.listdir(DOWNLOADs_PATH) #all items in downlaods
+    items = os.listdir(DOWNLOADS_PATH) #all items in downlaods
     
     for item in items:
         
@@ -132,27 +132,66 @@ def organize_downloads():
 
         for img_ext in IMAGE_EXTENSIONS:  #handle images
             if item.endswith(img_ext):
-                cat_path = DOWNLOADs_PATH + f'/{downloads_cats[0]}'
+                cat_path = DOWNLOADS_PATH + f'/{downloads_cats[0]}'
                 check_create_path(cat_path)
                 #move to Images
-                shutil.move(f'{DOWNLOADs_PATH}/{item}', f'{DOWNLOADs_PATH}/Images/{item}')
+                shutil.move(f'{DOWNLOADS_PATH}/{item}', f'{DOWNLOADS_PATH}/Images/{item}')
                 moved = True
         
         for doc_ext in DOCUMENTS_EXTENSIONS:
             if item.endswith(doc_ext):
-                cat_path = DOWNLOADs_PATH + f'/{downloads_cats[1]}'
+                cat_path = DOWNLOADS_PATH + f'/{downloads_cats[1]}'
                 check_create_path(cat_path)                # move to Documnets
-                shutil.move(f'{DOWNLOADs_PATH}/{item}', f'{DOWNLOADs_PATH}/Documents/{item}')
+                shutil.move(f'{DOWNLOADS_PATH}/{item}', f'{DOWNLOADS_PATH}/Documents/{item}')
                 moved = True
 
         for compress_ext in COMPRESSED_EXTENSIONS:
             if item.endswith(compress_ext):
-                cat_path = DOWNLOADs_PATH + f'/{downloads_cats[2]}'
+                cat_path = DOWNLOADS_PATH + f'/{downloads_cats[2]}'
                 check_create_path(cat_path)                #move to Compressed
-                shutil.move(f'{DOWNLOADs_PATH}/{item}', f'{DOWNLOADs_PATH}/Compressed/{item}')
+                shutil.move(f'{DOWNLOADS_PATH}/{item}', f'{DOWNLOADS_PATH}/Compressed/{item}')
                 moved = True
         
-        if not moved and not os.path.isdir(DOWNLOADs_PATH+f'/{item}'): # if the item is not moved yet
-                cat_path = DOWNLOADs_PATH + f'/{downloads_cats[3]}'
+        if not moved and not os.path.isdir(DOWNLOADS_PATH+f'/{item}'): # if the item is not moved yet
+                cat_path = DOWNLOADS_PATH + f'/{downloads_cats[3]}'
                 check_create_path(cat_path)            
-                shutil.move(f'{DOWNLOADs_PATH}/{item}', f'{DOWNLOADs_PATH}/Others/{item}')
+                shutil.move(f'{DOWNLOADS_PATH}/{item}', f'{DOWNLOADS_PATH}/Others/{item}')
+
+def organize_desktop():
+    '''
+        function to organize the desktop dir into 4 categories
+        Images, Documents, Compressed, Others
+    '''
+    desktop_cats = ['Images', 'Documents', 'Compressed', 'Others']
+    items = os.listdir(DESKTOP_PATH) #all items in downlaods
+
+    for item in items:
+        
+        moved = False
+
+        for img_ext in IMAGE_EXTENSIONS:  #handle images
+            if item.endswith(img_ext):
+                cat_path = DESKTOP_PATH + f'/{desktop_cats[0]}'
+                check_create_path(cat_path)
+                #move to Images
+                shutil.move(f'{DESKTOP_PATH}/{item}', f'{DESKTOP_PATH}/Images/{item}')
+                moved = True
+        
+        for doc_ext in DOCUMENTS_EXTENSIONS:
+            if item.endswith(doc_ext):
+                cat_path = DESKTOP_PATH + f'/{desktop_cats[1]}'
+                check_create_path(cat_path)                # move to Documnets
+                shutil.move(f'{DESKTOP_PATH}/{item}', f'{DESKTOP_PATH}/Documents/{item}')
+                moved = True
+
+        for compress_ext in COMPRESSED_EXTENSIONS:
+            if item.endswith(compress_ext):
+                cat_path = DESKTOP_PATH + f'/{desktop_cats[2]}'
+                check_create_path(cat_path)                #move to Compressed
+                shutil.move(f'{DESKTOP_PATH}/{item}', f'{DESKTOP_PATH}/Compressed/{item}')
+                moved = True
+        
+        if not moved and not os.path.isdir(DESKTOP_PATH+f'/{item}'): # if the item is not moved yet
+                cat_path = DESKTOP_PATH + f'/{desktop_cats[3]}'
+                check_create_path(cat_path)            
+                shutil.move(f'{DESKTOP_PATH}/{item}', f'{DESKTOP_PATH}/Others/{item}')
