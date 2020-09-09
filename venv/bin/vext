@@ -1,4 +1,4 @@
-#!/home/omars/Documents/projects/python-projects/speech_recog/venv/bin/python3
+#!/home/omars/Documents/projects/python_projects/speech_recog/venv/bin/python3
 # EASY-INSTALL-ENTRY-SCRIPT: 'vext==0.7.4','console_scripts','vext'
 __requires__ = 'vext==0.7.4'
 import re

@@ -48,7 +48,7 @@ class SpotifyPlayer:
         #opens spotify on a new process so that code could be run in parallel 
         p1 = Process(target=self.run)
         p1.start()
-        sleep(2)
+        sleep(5)
 
     def volume_up(self):
         if self.volume + 10 < 100:
@@ -67,14 +67,14 @@ class SpotifyPlayer:
 
 
 
-player = SpotifyPlayer()
+# player = SpotifyPlayer()
 
-def play_spotify():
-    #opens the spotify player and gets tracks to play
-    #and starts playing
-    player.open_spotify()
-    player.get_tracks('6QnnCV56shIVTlA11PpsSm')
-    player.get_device()
-    player.start()
-    return True
+# def play_spotify():
+#     #opens the spotify player and gets tracks to play
+#     #and starts playing
+#     player.open_spotify()
+#     player.get_tracks('6QnnCV56shIVTlA11PpsSm')
+#     player.get_device()
+#     player.start()
+#     return True
 
