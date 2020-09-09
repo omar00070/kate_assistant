@@ -1,27 +1,26 @@
 import spotipy, subprocess
 from spotipy.oauth2 import SpotifyOAuth
-
+import os
 from time import sleep
 from multiprocessing import Process
-
 
 
 class SpotifyPlayer:
     def __init__(self, *args, **kwargs):
         self.scope = "user-read-playback-state,user-modify-playback-state"
-        self.sp = spotipy.Spotify(client_credentials_manager=SpotifyOAuth(scope=self.scope, cache_path='CACHE'))
-        self.sp.volume = 50
+        self.sp = spotipy.Spotify(client_credentials_manager=SpotifyOAuth(scope=self.scope, cache_path=os.path.join('spotify', 'CACHE')))
+        self.volume = 50
         self.device_id = None 
         self.playlist = None
         self.tracks = None
 
     @staticmethod
     def run():
-        subprocess.call('./run.sh')
+        subprocess.call(os.path.join('spotify', 'run.sh'))
 
     @staticmethod
     def exit():
-        subprocess.call('./exit.sh')
+        subprocess.call(os.path.join('spotify', 'exit.sh'))
 
     def get_device(self):
         res = self.sp.devices()
@@ -52,40 +51,30 @@ class SpotifyPlayer:
         sleep(2)
 
     def volume_up(self):
-        if self.sp.volume + 10 < 100:
-            self.sp.volume += 10
+        if self.volume + 10 < 100:
+            self.volume += 10
         else:
-            self.sp.volume = 100
+            self.volume = 100
+        self.sp.volume(self.volume)
     
     def volume_down(self):
-        if self.sp.volume - 10 > 0:
-            self.sp.volume -= 10
+        if self.volume - 10 > 0:
+            self.volume -= 10
         else:
-            self.sp.volume = 0
+            self.volume = 0
+        self.sp.volume(self.volume)
+
 
 
 
 player = SpotifyPlayer()
 
-player.open_spotify()
-player.get_tracks('6QnnCV56shIVTlA11PpsSm')
-player.get_device()
-player.start()
-
-
-player.volume_up()
-print(player.sp.volume)
-sleep(1)
-player.volume_up()
-print(player.sp.volume)
-sleep(1)
-player.volume_up()
-print(player.sp.volume)
-
-while True:
-    decision = input('input something ')
-    if decision == 'next':
-        player.sp.next_track()
-    if decision == 'prev':
-        player.sp.previous_track()
+def play_spotify():
+    #opens the spotify player and gets tracks to play
+    #and starts playing
+    player.open_spotify()
+    player.get_tracks('6QnnCV56shIVTlA11PpsSm')
+    player.get_device()
+    player.start()
+    return True
 

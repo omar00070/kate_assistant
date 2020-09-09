@@ -5,7 +5,9 @@ from playsound import playsound
 import handle_os as handle
 from read_gmail import read_email_from_gmail
 from send_gmail import send_email_from_gmail
-
+from spotify.spotify_api import SpotifyPlayer
+from multiprocessing import Process
+from gtts import gTTS
 
 
 API_URL = os.environ.get('WATSON_URL')
@@ -19,7 +21,8 @@ SMTP_PORT   = 587
 
 
 class Assistant:
-    def __init__(self):
+    def __init__(self, host="watson"):
+        self.host = host
         self.voice = 'en-GB_KateV3Voice'
         self.tts = TextToSpeechV1(authenticator=AUTHENTICATOR)
         self.tts.set_service_url(API_URL)
@@ -28,6 +31,7 @@ class Assistant:
         self.mail.login(FROM_EMAIL, FROM_PWD)
         self.mail.select('inbox')
         self.session = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
+        self.player = SpotifyPlayer()
 
     def change_voice(self):
         '''
@@ -41,28 +45,72 @@ class Assistant:
     def talk(self,string):
         r = random.randint(1, 1000000)
         audio_file = "audio_" + str(r) + ".mp3"
-        
-        try:
-            with open(audio_file, 'wb') as audio:
-                res = self.tts.synthesize(string, accept='audio/mp3', voice=self.voice).get_result()
-                audio.write(res.content)
+
+        if self.host == 'watson':        
+            try:
+                with open(audio_file, 'wb') as audio:
+                    res = self.tts.synthesize(string, accept='audio/mp3', voice=self.voice).get_result()
+                    audio.write(res.content)
+                
+                playsound('./'+audio_file)
+                os.remove('./'+audio_file)
             
+            except ApiException as ex:
+                print("Method failed with status code " + str(ex.code) + ": " + ex.message)
+                os.remove('./'+audio_file)
+        
+        elif self.host == 'google':
+            if string == '':
+                string = 'nothing'
+            tts = gTTS(string)
+            tts.save(audio_file)
             playsound('./'+audio_file)
             os.remove('./'+audio_file)
-        
-        except ApiException as ex:
-            print("Method failed with status code " + str(ex.code) + ": " + ex.message)
-            os.remove('./'+audio_file)
 
+
+    def play_spotify(self):
+        #opens the spotify player and gets tracks to play
+        #and starts playing
+        self.player.open_spotify()
+        self.player.get_tracks('6QnnCV56shIVTlA11PpsSm')
+        self.player.get_device()
+        self.player.start()
+        return True
+
+    def control_spotify(self):
+        #function to control spotify
+        #you can control spotify with inputs at the moment
+        #param: none, TODO: params are going to be tracks and playlists
+
+        control = input('control spotify')
+        if 'next' in control:
+            self.player.sp.next_track()
+        if 'previous' in control:
+            self.player.sp.previous_track()
+        if 'pause' in control:
+            self.player.sp.pause_playback()
+        if 'play' in control:
+            self.player.sp.start_playback()
+        if 'up' in control:
+            self.player.volume_up()
+        if 'down' in control:
+            self.player.volume_down()
+        if 'exit' in control:
+            SpotifyPlayer.exit()
+            return False
+        return True
 
 def run():
-    assistant = Assistant()
+    assistant = Assistant('google')
     assistant.talk("how can i help you?")
     print('hello, how can i help you? \n')
     running = True 
+    playing = False
 
     while running:
-        text = input()
+        if playing:
+            playing = assistant.control_spotify()
+        text = input('write something: ')
         
         if "what" in text and "can" in text and "do" in text:
             assistant.talk('I can create a file, delete a file, read or update the content of an existing file for now.')
@@ -73,10 +121,11 @@ def run():
 
         elif "old" in text and "are" in text:
             assistant.talk('I am one million years old.')
-        
-        elif "weed" in text:
-            assistant.talk('yes man, weed is my life.')
-        
+            
+        elif "spotify" in text:
+            assistant.talk('playing spotify')
+            playing = assistant.play_spotify()
+            
         elif "sure" in text:
             assistant.talk('maybe, What do you think?')
         
@@ -95,7 +144,7 @@ def run():
         
         elif "create" in text:
             handle.create_file(assistant)
-        
+
         elif "read" in text and 'file' in text:
             handle.read_file(assistant)
         
@@ -111,6 +160,26 @@ def run():
             send_email_from_gmail(assistant)
         else:
             assistant.talk(text)
+
+
+
+
+
+# player.volume_up()
+# print(player.sp.volume)
+# sleep(1)
+# player.volume_up()
+# print(player.sp.volume)
+# sleep(1)
+# player.volume_up()
+# print(player.sp.volume)
+
+# while True:
+#     decision = input('input something ')
+#     if decision == 'next':
+#         player.sp.next_track()
+#     if decision == 'prev':
+#         player.sp.previous_track()
 
 
 if __name__ == "__main__":
