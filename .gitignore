@@ -1,4 +1,4 @@
-*.txt
+*file.txt
 __pycache__
 **/__pycache__
 venv
