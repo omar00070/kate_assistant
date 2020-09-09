@@ -2,9 +2,9 @@ import os, random, imaplib, smtplib
 from ibm_watson import TextToSpeechV1, ApiException
 from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
 from playsound import playsound
-import handle_os as handle
-from read_gmail import read_email_from_gmail
-from send_gmail import send_email_from_gmail
+from handle_os import handle_os as handle
+from emails.read_gmail import read_email_from_gmail
+from emails.send_gmail import send_email_from_gmail
 from spotify.spotify_api import SpotifyPlayer
 from multiprocessing import Process
 from gtts import gTTS
